@@ -1,0 +1,271 @@
+{
+    "about": {
+        "name": "Sophia Martinez",
+        "title": "Interior Designer & Space Curator",
+        "bio": "With over 12 years of experience transforming spaces into stunning, functional environments, I specialize in creating interiors that reflect the unique personality and lifestyle of each client. My design philosophy centers on the harmonious blend of aesthetics, functionality, and sustainability.",
+        "email": "sophia@designstudio.com",
+        "phone": "+1 (555) 123-4567",
+        "location": "New York, NY",
+        "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop",
+        "skills": [
+            "Residential Design",
+            "Commercial Spaces",
+            "3D Visualization",
+            "Sustainable Design",
+            "Space Planning",
+            "Color Theory",
+            "Furniture Selection",
+            "Project Management"
+        ],
+        "certifications": [
+            "NCIDQ Certified",
+            "LEED Accredited Professional",
+            "Certified Interior Designer (CID)"
+        ],
+        "social": {
+            "instagram": "https://instagram.com/sophiadesigns",
+            "pinterest": "https://pinterest.com/sophiadesigns",
+            "linkedin": "https://linkedin.com/in/sophiamartinez"
+        }
+    },
+    "projects": [
+        {
+            "id": 1,
+            "title": "Modern Minimalist Loft",
+            "category": "Residential",
+            "location": "Manhattan, NY",
+            "year": 2023,
+            "description": "A stunning 2,500 sq ft loft transformation featuring clean lines, neutral tones, and carefully curated furniture pieces. The open-concept design maximizes natural light while creating distinct zones for living, dining, and work.",
+            "image": "https://images.unsplash.com/photo-1600210492493-0946911123ea?w=800&h=600&fit=crop",
+            "images": [
+                "https://images.unsplash.com/photo-1600210492493-0946911123ea?w=800&h=600&fit=crop",
+                "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&h=600&fit=crop",
+                "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800&h=600&fit=crop"
+            ],
+            "tags": [
+                "Minimalist",
+                "Modern",
+                "Open Concept",
+                "Natural Light"
+            ]
+        },
+        {
+            "id": 2,
+            "title": "Boutique Hotel Lobby",
+            "category": "Hospitality",
+            "location": "Brooklyn, NY",
+            "year": 2023,
+            "description": "An elegant hotel lobby design that combines luxury with comfort. Rich textures, statement lighting, and custom furniture create an unforgettable first impression for guests.",
+            "image": "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&h=600&fit=crop",
+            "images": [
+                "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&h=600&fit=crop",
+                "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&h=600&fit=crop",
+                "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&h=600&fit=crop"
+            ],
+            "tags": [
+                "Luxury",
+                "Hospitality",
+                "Statement Lighting",
+                "Custom Furniture"
+            ]
+        },
+        {
+            "id": 3,
+            "title": "Coastal Villa Renovation",
+            "category": "Residential",
+            "location": "Hamptons, NY",
+            "year": 2022,
+            "description": "A complete renovation of a beachfront villa, incorporating coastal elements with contemporary design. The palette of whites, blues, and natural wood creates a serene, vacation-like atmosphere.",
+            "image": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&h=600&fit=crop",
+            "images": [
+                "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&h=600&fit=crop",
+                "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=800&h=600&fit=crop",
+                "https://images.unsplash.com/photo-1600607687644-c7171b42498b?w=800&h=600&fit=crop"
+            ],
+            "tags": [
+                "Coastal",
+                "Renovation",
+                "Beachfront",
+                "Contemporary"
+            ]
+        },
+        {
+            "id": 4,
+            "title": "Tech Startup Office",
+            "category": "Commercial",
+            "location": "Silicon Valley, CA",
+            "year": 2022,
+            "description": "A vibrant, collaborative workspace designed for a growing tech company. Features include open workstations, private meeting pods, a game room, and a café-style break area.",
+            "image": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=600&fit=crop",
+            "images": [
+                "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=600&fit=crop",
+                "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800&h=600&fit=crop",
+                "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&h=600&fit=crop"
+            ],
+            "tags": [
+                "Commercial",
+                "Collaborative",
+                "Modern",
+                "Tech"
+            ]
+        },
+        {
+            "id": 5,
+            "title": "Art Deco Penthouse",
+            "category": "Residential",
+            "location": "Chicago, IL",
+            "year": 2021,
+            "description": "A luxurious penthouse restoration celebrating Art Deco glamour. Bold geometric patterns, rich jewel tones, and metallic accents create a sophisticated, timeless space.",
+            "image": "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=800&h=600&fit=crop",
+            "images": [
+                "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=800&h=600&fit=crop",
+                "https://images.unsplash.com/photo-1600210491892-03d54c0aaf87?w=800&h=600&fit=crop",
+                "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&h=600&fit=crop"
+            ],
+            "tags": [
+                "Art Deco",
+                "Luxury",
+                "Restoration",
+                "Geometric"
+            ]
+        },
+        {
+            "id": 6,
+            "title": "Scandinavian Family Home",
+            "category": "Residential",
+            "location": "Portland, OR",
+            "year": 2021,
+            "description": "A warm, inviting family home inspired by Scandinavian design principles. Natural materials, functional furniture, and a neutral color palette create a cozy yet modern atmosphere.",
+            "image": "https://images.unsplash.com/photo-1600566753151-384129cf4e3e?w=800&h=600&fit=crop",
+            "images": [
+                "https://images.unsplash.com/photo-1600566753151-384129cf4e3e?w=800&h=600&fit=crop",
+                "https://images.unsplash.com/photo-1600566752355-35792bedcfea?w=800&h=600&fit=crop",
+                "https://images.unsplash.com/photo-1600573472592-401b489a3cdc?w=800&h=600&fit=crop"
+            ],
+            "tags": [
+                "Scandinavian",
+                "Family Home",
+                "Natural Materials",
+                "Cozy"
+            ]
+        },
+        {
+            "id": 7,
+            "title": "Fine Dining Restaurant",
+            "category": "Hospitality",
+            "location": "Miami, FL",
+            "year": 2020,
+            "description": "An upscale restaurant interior that balances elegance with intimacy. Custom lighting, plush seating, and a sophisticated color scheme create the perfect ambiance for fine dining.",
+            "image": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=600&fit=crop",
+            "images": [
+                "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=600&fit=crop",
+                "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&h=600&fit=crop",
+                "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&h=600&fit=crop"
+            ],
+            "tags": [
+                "Restaurant",
+                "Fine Dining",
+                "Elegant",
+                "Intimate"
+            ]
+        },
+        {
+            "id": 8,
+            "title": "Urban Industrial Loft",
+            "category": "Residential",
+            "location": "Austin, TX",
+            "year": 2020,
+            "description": "A bold industrial-style loft featuring exposed brick, metal accents, and vintage furniture. The design celebrates the building's history while incorporating modern amenities.",
+            "image": "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&h=600&fit=crop",
+            "images": [
+                "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&h=600&fit=crop",
+                "https://images.unsplash.com/photo-1600607687644-aac4c3eac7f4?w=800&h=600&fit=crop",
+                "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=800&h=600&fit=crop"
+            ],
+            "tags": [
+                "Industrial",
+                "Urban",
+                "Exposed Brick",
+                "Vintage"
+            ]
+        }
+    ],
+    "experience": [
+        {
+            "id": 1,
+            "title": "Senior Interior Designer",
+            "company": "Martinez Design Studio",
+            "location": "New York, NY",
+            "startDate": "2018",
+            "endDate": "Present",
+            "description": "Founded and lead a boutique design studio specializing in high-end residential and commercial projects. Manage a team of 5 designers and oversee all aspects of project execution.",
+            "achievements": [
+                "Completed 50+ residential and commercial projects",
+                "Featured in Architectural Digest and Elle Decor",
+                "Won 'Best Interior Design' at NYC Design Awards 2022"
+            ]
+        },
+        {
+            "id": 2,
+            "title": "Lead Designer",
+            "company": "Urban Spaces Inc.",
+            "location": "New York, NY",
+            "startDate": "2015",
+            "endDate": "2018",
+            "description": "Led design teams for large-scale commercial and hospitality projects. Collaborated with architects and contractors to deliver exceptional spaces on time and within budget.",
+            "achievements": [
+                "Managed projects valued at $10M+",
+                "Developed sustainable design guidelines for the company",
+                "Mentored junior designers and interns"
+            ]
+        },
+        {
+            "id": 3,
+            "title": "Interior Designer",
+            "company": "Creative Interiors",
+            "location": "Los Angeles, CA",
+            "startDate": "2012",
+            "endDate": "2015",
+            "description": "Worked on diverse residential projects ranging from modern apartments to traditional homes. Developed strong client relationships and honed skills in space planning and material selection.",
+            "achievements": [
+                "Completed 30+ residential projects",
+                "Achieved 98% client satisfaction rate",
+                "Earned NCIDQ certification"
+            ]
+        }
+    ],
+    "testimonials": [
+        {
+            "id": 1,
+            "name": "Jennifer Thompson",
+            "role": "Homeowner",
+            "image": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
+            "rating": 5,
+            "text": "Sophia transformed our loft into a dream home! Her attention to detail and ability to understand our vision was remarkable. We couldn't be happier with the results."
+        },
+        {
+            "id": 2,
+            "name": "Michael Chen",
+            "role": "Restaurant Owner",
+            "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
+            "rating": 5,
+            "text": "Working with Sophia on our restaurant was an absolute pleasure. She created an ambiance that perfectly matches our culinary vision. Our customers constantly compliment the design!"
+        },
+        {
+            "id": 3,
+            "name": "Sarah Williams",
+            "role": "CEO, Tech Startup",
+            "image": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
+            "rating": 5,
+            "text": "Sophia designed our office space to be both functional and inspiring. The collaborative areas she created have significantly improved our team's productivity and morale."
+        },
+        {
+            "id": 4,
+            "name": "David Martinez",
+            "role": "Hotel Manager",
+            "image": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop",
+            "rating": 5,
+            "text": "The lobby design Sophia created for our boutique hotel has become our signature feature. Guests are consistently impressed from the moment they walk in. Highly recommended!"
+        }
+    ]
+}

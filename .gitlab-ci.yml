@@ -1,0 +1,68 @@
+stages:
+  - build
+  - deploy_backend
+  - deploy_frontend
+
+variables:
+  NODE_VERSION: "18"
+
+# Build Stage
+build:
+  stage: build
+  image: node:${NODE_VERSION}
+  script:
+    - echo "Installing backend dependencies..."
+    - npm install
+    
+    - echo "Installing frontend dependencies..."
+    - cd client
+    - npm install
+    
+    - echo "Building React frontend..."
+    - npm run build
+    
+    - echo "Build completed successfully!"
+  artifacts:
+    paths:
+      - client/build/
+    expire_in: 1 hour
+  only:
+    - main
+
+# Deploy Backend to EC2
+deploy_backend:
+  stage: deploy_backend
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client bash
+    - eval $(ssh-agent -s)
+    - echo "$EC2_SSH_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
+  script:
+    - echo "Deploying backend to EC2..."
+    - ssh $EC2_USER@$EC2_HOST "bash -s" < ./scripts/deploy-backend.sh
+  only:
+    - main
+  needs:
+    - build
+
+# Deploy Frontend to S3
+deploy_frontend:
+  stage: deploy_frontend
+  image: python:3.9-alpine
+  before_script:
+    - pip install awscli
+  script:
+    - echo "Deploying frontend to S3..."
+    - aws s3 sync client/build/ s3://$S3_BUCKET_NAME --delete
+    - echo "Setting cache headers..."
+    - aws s3 cp s3://$S3_BUCKET_NAME s3://$S3_BUCKET_NAME --recursive --metadata-directive REPLACE --cache-control max-age=31536000,public --exclude "*.html"
+    - aws s3 cp s3://$S3_BUCKET_NAME s3://$S3_BUCKET_NAME --recursive --metadata-directive REPLACE --cache-control no-cache --include "*.html"
+    - echo "Frontend deployed successfully to S3!"
+    - echo "URL: http://$S3_BUCKET_NAME.s3-website-$AWS_DEFAULT_REGION.amazonaws.com"
+  only:
+    - main
+  needs:
+    - build
