@@ -27,16 +27,16 @@ pipeline {
                 
                 // Install backend dependencies
                 echo 'Installing backend dependencies...'
-                sh 'npm install'
+                bat 'npm install'
                 
                 // Install frontend dependencies
                 echo 'Installing frontend dependencies...'
                 dir('client') {
-                    sh 'npm install'
+                    bat 'npm install'
                     
                     // Build React application
                     echo 'Building React frontend...'
-                    sh 'npm run build'
+                    bat 'npm run build'
                 }
                 
                 echo 'Build completed successfully!'
@@ -46,20 +46,17 @@ pipeline {
         stage('Deploy Backend') {
             steps {
                 echo 'Deploying backend to EC2...'
+                echo 'Note: SSH deployment from Windows Jenkins requires additional setup.'
+                echo 'For now, this stage will be skipped. Deploy backend manually or use a Linux Jenkins agent.'
                 
-                // Use SSH credentials stored in Jenkins
-                sshagent(credentials: ['ec2-ssh-key']) {
-                    sh '''
-                        # Add EC2 host to known_hosts
-                        mkdir -p ~/.ssh
-                        ssh-keyscan -H ${EC2_HOST} >> ~/.ssh/known_hosts
-                        
-                        # Deploy backend by executing the deployment script on EC2
-                        ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "bash -s" < ./scripts/deploy-backend.sh
-                    '''
+                // Windows doesn't have native SSH like Linux
+                // You would need to install OpenSSH or use a different method
+                // For simplicity, we'll skip this stage on Windows
+                script {
+                    echo 'Backend deployment skipped on Windows. Please deploy manually to EC2.'
+                    echo 'SSH to EC2: ssh -i your-key.pem ubuntu@${EC2_HOST}'
+                    echo 'Then run: cd /home/ubuntu/interior-designer-portfolio && git pull && npm install --production && pm2 restart ecosystem.config.js'
                 }
-                
-                echo 'Backend deployment completed!'
             }
         }
         
@@ -67,37 +64,39 @@ pipeline {
             steps {
                 echo 'Deploying frontend to S3...'
                 
-                // Install AWS CLI if not available
-                sh '''
-                    if ! command -v aws &> /dev/null; then
-                        echo "Installing AWS CLI..."
-                        pip install awscli
-                    fi
-                '''
+                // Check if AWS CLI is available
+                script {
+                    def awsInstalled = bat(script: '@where aws 2>nul', returnStatus: true) == 0
+                    if (!awsInstalled) {
+                        echo 'AWS CLI not found. Please install AWS CLI for Windows.'
+                        echo 'Download from: https://aws.amazon.com/cli/'
+                        error('AWS CLI is required for S3 deployment')
+                    }
+                }
                 
                 // Sync React build to S3
                 echo "Uploading files to S3 bucket: ${S3_BUCKET_NAME}..."
-                sh 'aws s3 sync client/build/ s3://${S3_BUCKET_NAME} --delete'
+                bat "aws s3 sync client\\build\\ s3://%S3_BUCKET_NAME% --delete"
                 
                 // Set cache headers for static assets (1 year)
                 echo 'Setting cache headers for static assets...'
-                sh '''
-                    aws s3 cp s3://${S3_BUCKET_NAME} s3://${S3_BUCKET_NAME} \
-                        --recursive \
-                        --metadata-directive REPLACE \
-                        --cache-control max-age=31536000,public \
+                bat """
+                    aws s3 cp s3://%S3_BUCKET_NAME% s3://%S3_BUCKET_NAME% ^
+                        --recursive ^
+                        --metadata-directive REPLACE ^
+                        --cache-control max-age=31536000,public ^
                         --exclude "*.html"
-                '''
+                """
                 
                 // Set cache headers for HTML files (no cache)
                 echo 'Setting cache headers for HTML files...'
-                sh '''
-                    aws s3 cp s3://${S3_BUCKET_NAME} s3://${S3_BUCKET_NAME} \
-                        --recursive \
-                        --metadata-directive REPLACE \
-                        --cache-control no-cache \
+                bat """
+                    aws s3 cp s3://%S3_BUCKET_NAME% s3://%S3_BUCKET_NAME% ^
+                        --recursive ^
+                        --metadata-directive REPLACE ^
+                        --cache-control no-cache ^
                         --include "*.html"
-                '''
+                """
                 
                 echo 'Frontend deployment completed successfully!'
                 echo "Website URL: http://${S3_BUCKET_NAME}.s3-website-${AWS_DEFAULT_REGION}.amazonaws.com"
