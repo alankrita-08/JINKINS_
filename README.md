@@ -14,7 +14,7 @@ A stunning, modern portfolio website for interior designers built with React and
 - **Client Testimonials**: Auto-rotating carousel with ratings
 - **Contact Form**: Elegant contact form with validation
 - **REST API**: Express backend serving portfolio data
-- **CI/CD Ready**: GitLab CI/CD pipeline for automated deployment
+- **CI/CD Ready**: Jenkins pipeline for automated deployment
 
 ## 🛠️ Tech Stack
 
@@ -31,7 +31,7 @@ A stunning, modern portfolio website for interior designers built with React and
 - JSON data storage
 
 ### DevOps
-- GitLab CI/CD
+- Jenkins Pipeline
 - AWS EC2 (Backend hosting)
 - AWS S3 (Frontend static hosting)
 - PM2 (Process management)
@@ -41,7 +41,7 @@ A stunning, modern portfolio website for interior designers built with React and
 - Node.js 18+ and npm
 - Git
 - AWS Account (for deployment)
-- GitLab account (for CI/CD)
+- Jenkins server (for CI/CD)
 
 ## 🚀 Getting Started
 
@@ -103,11 +103,13 @@ A stunning, modern portfolio website for interior designers built with React and
 
 ## 🚢 Deployment
 
-### GitLab CI/CD Setup
+### Jenkins Pipeline Setup
 
-1. **Configure GitLab CI/CD Variables**
+For detailed Jenkins setup instructions, see [JENKINS_SETUP.md](JENKINS_SETUP.md).
+
+1. **Configure Jenkins Credentials**
    
-   Go to your GitLab project → Settings → CI/CD → Variables and add:
+   Go to Jenkins → Manage Jenkins → Manage Credentials and add:
 
    **AWS Credentials:**
    - `AWS_ACCESS_KEY_ID` - Your AWS access key
@@ -162,14 +164,16 @@ A stunning, modern portfolio website for interior designers built with React and
      --policy file://bucket-policy.json
    ```
 
-4. **Push to GitLab**
+4. **Trigger Jenkins Pipeline**
    
-   Push your code to the `main` branch to trigger the CI/CD pipeline:
+   Push your code to the `main` branch to trigger the Jenkins pipeline:
    ```bash
    git add .
    git commit -m "Initial commit"
    git push origin main
    ```
+   
+   Or manually trigger from Jenkins Dashboard → Build Now
 
 ### Manual Deployment
 
@@ -204,7 +208,8 @@ aws s3 sync build/ s3://your-bucket-name --delete
 ├── scripts/
 │   ├── deploy-backend.sh  # EC2 deployment script
 │   └── deploy-frontend.sh # S3 deployment script
-├── .gitlab-ci.yml         # CI/CD pipeline
+├── Jenkinsfile            # Jenkins pipeline configuration
+├── JENKINS_SETUP.md       # Jenkins setup guide
 ├── ecosystem.config.js    # PM2 configuration
 ├── server.js              # Express server
 └── package.json           # Backend dependencies

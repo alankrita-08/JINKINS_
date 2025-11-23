@@ -1,4 +1,4 @@
-# Complete Deployment Guide: GitLab CI/CD with React + Express
+# Complete Deployment Guide: Jenkins Pipeline with React + Express
 
 ## 📋 Table of Contents
 
@@ -8,28 +8,31 @@
    - [EC2 Instance Setup](#ec2-instance-setup)
    - [S3 Bucket Setup](#s3-bucket-setup)
    - [IAM User & Permissions](#iam-user--permissions)
-4. [GitLab CI/CD Configuration](#gitlab-cicd-configuration)
-5. [Deployment Process](#deployment-process)
-6. [Troubleshooting](#troubleshooting)
-7. [Monitoring & Maintenance](#monitoring--maintenance)
+4. [Jenkins Setup](#jenkins-setup)
+5. [Pipeline Configuration](#pipeline-configuration)
+6. [Deployment Process](#deployment-process)
+7. [Troubleshooting](#troubleshooting)
+8. [Monitoring & Maintenance](#monitoring--maintenance)
 
 ---
 
 ## Overview
 
-This guide walks you through deploying a **React + Express** application using **GitLab CI/CD** with:
+This guide walks you through deploying a **React + Express** application using **Jenkins Pipeline** with:
 - **Backend (Express)**: Hosted on AWS EC2 with PM2 process management
 - **Frontend (React)**: Hosted on AWS S3 as a static website
-- **CI/CD**: Automated deployment via GitLab pipelines
+- **CI/CD**: Automated deployment via Jenkins pipeline
+
+> **Note**: For detailed Jenkins installation and setup instructions, see [JENKINS_SETUP.md](JENKINS_SETUP.md)
 
 ### Architecture Diagram
 
 ```mermaid
 graph LR
-    A[GitLab Repository] -->|Push to main| B[GitLab CI/CD Pipeline]
+    A[Git Repository] -->|Webhook/Poll| B[Jenkins Pipeline]
     B -->|Build| C[Build Stage]
-    C -->|Artifacts| D[Deploy Backend]
-    C -->|Artifacts| E[Deploy Frontend]
+    C -->|Deploy| D[Deploy Backend]
+    C -->|Deploy| E[Deploy Frontend]
     D -->|SSH Deploy| F[AWS EC2<br/>Express Server]
     E -->|AWS CLI| G[AWS S3<br/>React Static Site]
     F -->|API Calls| H[Users]
@@ -43,7 +46,8 @@ graph LR
 Before starting, ensure you have:
 
 - ✅ **AWS Account** with billing enabled
-- ✅ **GitLab Account** (free tier works)
+- ✅ **Git Repository** (GitHub, GitLab, or Bitbucket)
+- ✅ **Jenkins Server** (local or remote - see [JENKINS_SETUP.md](JENKINS_SETUP.md))
 - ✅ **Domain Name** (optional, for custom domain)
 - ✅ **Local Development Environment**:
   - Node.js 18+
@@ -125,37 +129,55 @@ mkdir -p /home/ubuntu/interior-designer-portfolio
 
 #### Step 4: Configure Git Access on EC2
 
-You need to allow your EC2 instance to pull code from GitLab:
+You need to allow your EC2 instance to pull code from your Git repository:
 
 ```bash
 # Generate SSH key on EC2
-ssh-keygen -t ed25519 -C "ec2-gitlab-deploy" -f ~/.ssh/gitlab_deploy_key -N ""
+ssh-keygen -t ed25519 -C "ec2-deploy" -f ~/.ssh/git_deploy_key -N ""
 
 # Display the public key
-cat ~/.ssh/gitlab_deploy_key.pub
+cat ~/.ssh/git_deploy_key.pub
 ```
 
-**Copy this public key**, then:
+**Copy this public key**, then add it to your Git repository:
 
-1. Go to your GitLab project → **Settings** → **Repository** → **Deploy Keys**
+**For GitHub:**
+1. Go to your repository → **Settings** → **Deploy keys** → **Add deploy key**
+2. Paste the public key
+3. Title: `EC2 Deploy Key`
+4. Click **"Add key"**
+
+**For GitLab:**
+1. Go to your project → **Settings** → **Repository** → **Deploy Keys**
 2. Click **"Add new key"**
 3. Paste the public key
-4. Give it a title: `EC2 Deploy Key`
-5. Check **"Grant write permissions"** (if you need to push from EC2)
-6. Click **"Add key"**
+4. Title: `EC2 Deploy Key`
+5. Click **"Add key"**
+
+**For Bitbucket:**
+1. Go to repository → **Settings** → **Access keys** → **Add key**
+2. Paste the public key
+3. Label: `EC2 Deploy Key`
+4. Click **"Add key"**
 
 Configure SSH on EC2:
 
 ```bash
-# Add GitLab to known hosts
+# Add your Git provider to known hosts
+# For GitHub:
+ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+# For GitLab:
 ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
+
+# For Bitbucket:
+ssh-keyscan bitbucket.org >> ~/.ssh/known_hosts
 
 # Configure SSH to use the deploy key
 cat >> ~/.ssh/config << EOF
-Host gitlab.com
-  HostName gitlab.com
+Host github.com gitlab.com bitbucket.org
   User git
-  IdentityFile ~/.ssh/gitlab_deploy_key
+  IdentityFile ~/.ssh/git_deploy_key
   StrictHostKeyChecking no
 EOF
 
@@ -165,9 +187,18 @@ chmod 600 ~/.ssh/config
 #### Step 5: Initial Deployment on EC2
 
 ```bash
-# Clone your repository (replace with your GitLab repo URL)
+# Clone your repository (replace with your repo URL)
 cd /home/ubuntu
+
+# For GitHub:
+git clone git@github.com:YOUR_USERNAME/YOUR_REPO.git interior-designer-portfolio
+
+# For GitLab:
 git clone git@gitlab.com:YOUR_USERNAME/YOUR_REPO.git interior-designer-portfolio
+
+# For Bitbucket:
+git clone git@bitbucket.org:YOUR_USERNAME/YOUR_REPO.git interior-designer-portfolio
+
 cd interior-designer-portfolio
 
 # Install production dependencies
@@ -208,7 +239,7 @@ curl http://<YOUR_EC2_PUBLIC_IP>:5000/api/projects
 
 ---
 
-### S3 Bucket Setup
+### S3 Bucket Setup 
 
 #### Step 1: Create S3 Bucket
 
@@ -312,10 +343,10 @@ aws s3api put-bucket-cors \
 
 ### IAM User & Permissions
 
-#### Step 1: Create IAM User for GitLab CI/CD
+#### Step 1: Create IAM User for Jenkins
 
 1. Go to **IAM** → **Users** → **Create user**
-2. **User name**: `gitlab-ci-deployer`
+2. **User name**: `jenkins-deployer`
 3. **Access type**: Select **"Access key - Programmatic access"**
 4. Click **"Next"**
 
@@ -352,7 +383,7 @@ Click **"Attach policies directly"** and create a custom policy:
 ```
 
 3. Click **"Next"**
-4. **Policy name**: `GitLabCIDeploymentPolicy`
+4. **Policy name**: `JenkinsDeploymentPolicy`
 5. Click **"Create policy"**
 
 Go back to user creation and attach this policy.
@@ -365,50 +396,36 @@ Go back to user creation and attach this policy.
 
 ---
 
-## GitLab CI/CD Configuration
+## Jenkins Setup
 
-### Step 1: Add CI/CD Variables to GitLab
+> **For complete Jenkins installation and configuration instructions, see [JENKINS_SETUP.md](JENKINS_SETUP.md)**
 
-1. Go to your GitLab project
-2. Navigate to **Settings** → **CI/CD** → **Variables**
-3. Click **"Add variable"** for each of the following:
+This section provides a quick overview of the Jenkins requirements.
+
+### Required Jenkins Credentials
+
+You need to configure the following credentials in Jenkins:
+
+**Navigate to**: Jenkins Dashboard → Manage Jenkins → Manage Credentials → (global) → Add Credentials
 
 #### AWS Credentials
 
-| Key | Value | Protected | Masked | Description |
-|-----|-------|-----------|--------|-------------|
-| `AWS_ACCESS_KEY_ID` | Your IAM access key | ✅ | ✅ | AWS access key |
-| `AWS_SECRET_ACCESS_KEY` | Your IAM secret key | ✅ | ✅ | AWS secret key |
-| `AWS_DEFAULT_REGION` | `us-east-1` | ✅ | ❌ | AWS region |
-| `S3_BUCKET_NAME` | `interior-portfolio-frontend` | ✅ | ❌ | S3 bucket name |
+| Credential ID | Type | Value |
+|---------------|------|-------|
+| `aws-access-key-id` | Secret text | Your AWS access key ID |
+| `aws-secret-access-key` | Secret text | Your AWS secret access key |
+| `aws-region` | Secret text | AWS region (e.g., us-east-1) |
+| `s3-bucket-name` | Secret text | S3 bucket name |
 
 #### EC2 Credentials
 
-| Key | Value | Protected | Masked | Description |
-|-----|-------|-----------|--------|-------------|
-| `EC2_HOST` | Your EC2 public IP | ✅ | ❌ | EC2 instance IP |
-| `EC2_USER` | `ubuntu` | ✅ | ❌ | EC2 username |
-| `EC2_SSH_KEY` | Contents of `.pem` file | ✅ | ✅ | Private SSH key |
+| Credential ID | Type | Value |
+|---------------|------|-------|
+| `ec2-host` | Secret text | EC2 public IP address |
+| `ec2-user` | Secret text | EC2 username (ubuntu) |
+| `ec2-ssh-key` | SSH Username with private key | Your .pem file contents |
 
-> **For `EC2_SSH_KEY`**: Open your `.pem` file in a text editor, copy the entire contents (including `-----BEGIN RSA PRIVATE KEY-----` and `-----END RSA PRIVATE KEY-----`), and paste it as the value.
-
-### Step 2: Verify `.gitlab-ci.yml`
-
-Your project already has a `.gitlab-ci.yml` file. Here's what it does:
-
-```yaml
-stages:
-  - build           # Builds both frontend and backend
-  - deploy_backend  # Deploys Express to EC2
-  - deploy_frontend # Deploys React to S3
-```
-
-**Pipeline Flow**:
-1. **Build Stage**: Installs dependencies and builds React app
-2. **Deploy Backend**: SSHs into EC2 and runs deployment script
-3. **Deploy Frontend**: Syncs React build to S3 bucket
-
-### Step 3: Update Backend API URL in Frontend
+### Update Backend API URL in Frontend
 
 Before deploying, update your React app to point to the EC2 backend:
 
@@ -432,41 +449,116 @@ fetch(`${API_URL}/api/projects`)
 
 ---
 
+## Pipeline Configuration
+
+### Pipeline Overview
+
+The Jenkins pipeline is defined in the `Jenkinsfile` at the root of your project. It consists of three main stages:
+
+1. **Build Stage**: Installs dependencies and builds React app
+2. **Deploy Backend**: SSHs into EC2 and runs deployment script
+3. **Deploy Frontend**: Syncs React build to S3 bucket
+
+### Setting Up the Pipeline Job
+
+1. **Create New Pipeline**:
+   - Jenkins Dashboard → **New Item**
+   - Name: `Interior-Portfolio-Deployment`
+   - Type: **Pipeline**
+   - Click **OK**
+
+2. **Configure Pipeline**:
+   - **Description**: `Automated deployment for React + Express portfolio`
+   - **Build Triggers**: 
+     - Check **"Poll SCM"** with schedule `H/5 * * * *` (checks every 5 minutes)
+     - Or configure webhooks (see [JENKINS_SETUP.md](JENKINS_SETUP.md))
+   - **Pipeline**:
+     - **Definition**: Pipeline script from SCM
+     - **SCM**: Git
+     - **Repository URL**: Your Git repository URL
+     - **Credentials**: Add if repository is private
+     - **Branch Specifier**: `*/main`
+     - **Script Path**: `Jenkinsfile`
+   - Click **Save**
+
+3. **Test the Pipeline**:
+   - Click **"Build Now"**
+   - Watch the build progress
+   - Check **Console Output** for logs
+
+---
+
 ## Deployment Process
 
-### Initial Deployment
+### Automated Deployment Workflow
 
-1. **Commit your changes**:
+1. **Make Changes to Your Code**:
+   ```bash
+   # Make your changes
+   git add .
+   git commit -m "Your commit message"
+   git push origin main
+   ```
+
+2. **Jenkins Automatically Detects Changes**:
+   - If using Poll SCM, Jenkins checks for changes every 5 minutes
+   - If using webhooks, Jenkins is triggered immediately
+
+3. **Pipeline Executes**:
+   - **Build Stage**: Installs dependencies, builds React app
+   - **Deploy Backend**: SSHs to EC2, pulls latest code, restarts PM2
+   - **Deploy Frontend**: Syncs React build to S3
+
+4. **Access Your Application**:
+   - **Frontend**: `http://<BUCKET_NAME>.s3-website-<REGION>.amazonaws.com`
+   - **Backend API**: `http://<EC2_IP>:5000/api/projects`
+
+### Manual Deployment
+
+If you need to deploy manually:
+
+#### Backend Manual Deployment
 
 ```bash
-git add .
-git commit -m "Configure production deployment"
-git push origin main
+# SSH into EC2
+ssh -i portfolio-ec2-key.pem ubuntu@<EC2_IP>
+
+# Navigate to project directory
+cd /home/ubuntu/interior-designer-portfolio
+
+# Pull latest code
+git pull origin main
+
+# Install dependencies
+npm install --production
+
+# Restart application
+pm2 restart ecosystem.config.js
 ```
 
-2. **Monitor the pipeline**:
-   - Go to GitLab → **CI/CD** → **Pipelines**
-   - Click on the running pipeline
-   - Watch each stage complete:
-     - ✅ Build
-     - ✅ Deploy Backend
-     - ✅ Deploy Frontend
-
-3. **Access your application**:
-   - **Frontend**: `http://<S3_BUCKET_NAME>.s3-website-<REGION>.amazonaws.com`
-   - **Backend API**: `http://<EC2_PUBLIC_IP>:5000/api/projects`
-
-### Subsequent Deployments
-
-Every push to the `main` branch will automatically trigger the CI/CD pipeline:
+#### Frontend Manual Deployment
 
 ```bash
-# Make your changes
-git add .
-git commit -m "Update portfolio content"
-git push origin main
+# Build React app locally
+cd client
+npm run build
 
-# Pipeline runs automatically!
+# Deploy to S3
+aws s3 sync build/ s3://<BUCKET_NAME> --delete
+
+# Set cache headers for static assets
+aws s3 cp s3://<BUCKET_NAME> s3://<BUCKET_NAME> \
+  --recursive \
+  --metadata-directive REPLACE \
+  --cache-control max-age=31536000,public \
+  --exclude "*.html"
+
+# Set cache headers for HTML files
+aws s3 cp s3://<BUCKET_NAME> s3://<BUCKET_NAME> \
+  --recursive \
+  --metadata-directive REPLACE \
+  --cache-control no-cache \
+  --include "*.html"
 ```
 
 ---
@@ -493,8 +585,8 @@ cd client && npm install
 **Error**: `Permission denied (publickey)`
 
 **Solution**:
-- Verify `EC2_SSH_KEY` variable contains the complete private key
-- Check EC2 security group allows SSH from GitLab runners
+- Verify `ec2-ssh-key` credential contains the complete private key
+- Check EC2 security group allows SSH (port 22)
 - Ensure the key format is correct (no extra spaces/newlines)
 
 ```bash
@@ -508,7 +600,7 @@ ssh -i portfolio-ec2-key.pem ubuntu@<EC2_IP>
 
 **Solution**:
 - Verify IAM user has correct permissions
-- Check `S3_BUCKET_NAME` variable matches actual bucket name
+- Check `s3-bucket-name` credential matches actual bucket name
 - Ensure bucket exists in the specified region
 
 ```bash
@@ -549,6 +641,35 @@ pm2 restart interior-designer-portfolio
 **Error**: S3 returns 404 when refreshing on routes like `/projects`
 
 **Solution**: Already configured! The S3 bucket is set to use `index.html` as the error document, which handles React Router correctly.
+
+#### 7. **Jenkins Build Fails: "node: command not found"**
+
+**Error**: Node.js not found during build
+
+**Solution**:
+- Verify NodeJS plugin is installed in Jenkins
+- Configure NodeJS in Jenkins: Manage Jenkins → Global Tool Configuration → NodeJS
+- Add NodeJS installation with name `18`
+
+#### 8. **Deployment Script Fails on EC2**
+
+**Error**: Script execution fails on EC2
+
+**Solution**:
+```bash
+# SSH into EC2
+ssh -i portfolio-ec2-key.pem ubuntu@<EC2_IP>
+
+# Check if Git repository is accessible
+cd /home/ubuntu/interior-designer-portfolio
+git pull origin main
+
+# Check if PM2 is running
+pm2 status
+
+# Check deployment script permissions
+chmod +x scripts/deploy-backend.sh
+```
 
 ---
 
@@ -616,21 +737,20 @@ aws s3 ls s3://<BUCKET_NAME> --recursive
 aws s3 ls s3://<BUCKET_NAME> --recursive --summarize --human-readable
 ```
 
-#### Manual Frontend Deployment
+### Jenkins Monitoring
 
-If you need to deploy frontend manually:
+#### View Build History
 
-```bash
-# Build React app locally
-cd client
-npm run build
+1. Go to your pipeline job
+2. Click on **"Build History"**
+3. Click on any build number to see details
+4. Click **"Console Output"** to see logs
 
-# Deploy to S3
-aws s3 sync build/ s3://<BUCKET_NAME> --delete
+#### Set Up Email Notifications
 
-# Invalidate CloudFront cache (if using CloudFront)
-aws cloudfront create-invalidation --distribution-id <DIST_ID> --paths "/*"
-```
+1. Go to: Manage Jenkins → Configure System → E-mail Notification
+2. Configure SMTP server settings
+3. In your pipeline job configuration, add post-build action for email notifications
 
 ### Cost Monitoring
 
@@ -746,23 +866,6 @@ For sensitive configuration, use environment variables:
    };
    ```
 
-### Scaling Considerations
-
-#### Horizontal Scaling (Multiple EC2 Instances)
-
-1. Set up Application Load Balancer (ALB)
-2. Create Auto Scaling Group
-3. Update GitLab CI/CD to deploy to multiple instances
-
-#### Database Integration
-
-If you need a database:
-
-1. **AWS RDS** (managed PostgreSQL/MySQL)
-2. **MongoDB Atlas** (managed MongoDB)
-3. Update backend to connect to database
-4. Store connection string in environment variables
-
 ---
 
 ## Security Best Practices
@@ -779,20 +882,21 @@ If you need a database:
 - [ ] Enable **CloudWatch** logging for monitoring
 - [ ] Set up **automated backups** for critical data
 - [ ] Use **AWS Secrets Manager** for production secrets
+- [ ] Secure Jenkins with **authentication** and **HTTPS**
+- [ ] Regularly **update Jenkins** and plugins
 
 ---
 
 ## Quick Reference Commands
 
-### GitLab CI/CD
+### Jenkins
 
 ```bash
-# Trigger pipeline manually
-git commit --allow-empty -m "Trigger pipeline"
-git push origin main
+# Trigger build manually
+# Go to: Jenkins Dashboard → Your Pipeline → Build Now
 
-# View pipeline status
-# Go to: GitLab → CI/CD → Pipelines
+# View build logs
+# Go to: Build History → Click build number → Console Output
 ```
 
 ### EC2 Management
@@ -834,31 +938,26 @@ aws s3 rm s3://<BUCKET_NAME> --recursive
 
 ## Conclusion
 
-You now have a fully automated CI/CD pipeline for your React + Express application! 🎉
+You now have a fully automated CI/CD pipeline for your React + Express application using Jenkins! 🎉
 
-**What happens on every push to `main`**:
-1. ✅ GitLab builds your React frontend
-2. ✅ GitLab deploys Express backend to EC2
-3. ✅ GitLab deploys React frontend to S3
-4. ✅ Your application is live!
+### Next Steps
 
-**Next Steps**:
-- [ ] Set up custom domain
-- [ ] Configure HTTPS/SSL
-- [ ] Add monitoring and alerts
-- [ ] Implement automated backups
-- [ ] Set up staging environment
+1. ✅ **Test the pipeline** with a small change
+2. ✅ **Configure webhooks** for instant builds (optional)
+3. ✅ **Set up custom domain** (optional)
+4. ✅ **Enable HTTPS** with SSL certificates
+5. ✅ **Monitor your application** regularly
+6. ✅ **Set up billing alerts** to avoid surprises
 
----
+### Additional Resources
 
-## Support & Resources
-
-- **GitLab CI/CD Docs**: https://docs.gitlab.com/ee/ci/
-- **AWS EC2 Docs**: https://docs.aws.amazon.com/ec2/
-- **AWS S3 Docs**: https://docs.aws.amazon.com/s3/
-- **PM2 Docs**: https://pm2.keymetrics.io/docs/
-- **React Deployment**: https://vitejs.dev/guide/static-deploy.html
+- [Jenkins Official Documentation](https://www.jenkins.io/doc/)
+- [Jenkins Pipeline Syntax](https://www.jenkins.io/doc/book/pipeline/syntax/)
+- [AWS CLI Documentation](https://docs.aws.amazon.com/cli/)
+- [PM2 Documentation](https://pm2.keymetrics.io/docs/)
+- [React Documentation](https://react.dev/)
+- [Express Documentation](https://expressjs.com/)
 
 ---
 
-**Made with ❤️ for seamless deployments**
+**Need help?** Check [JENKINS_SETUP.md](JENKINS_SETUP.md) for detailed Jenkins configuration or the [Troubleshooting](#troubleshooting) section above.

@@ -10,8 +10,8 @@ echo "Starting backend deployment..."
 # Navigate to project directory
 cd /home/ubuntu/interior-designer-portfolio || exit 1
 
-# Pull latest code from GitLab
-echo "Pulling latest code from GitLab..."
+# Pull latest code from repository
+echo "Pulling latest code from repository..."
 git pull origin main
 
 # Install/update dependencies
