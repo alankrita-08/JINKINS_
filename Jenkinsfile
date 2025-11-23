@@ -107,8 +107,8 @@ pipeline {
     post {
         success {
             echo '✅ Pipeline completed successfully!'
-            echo 'Frontend: http://${S3_BUCKET_NAME}.s3-website-${AWS_DEFAULT_REGION}.amazonaws.com'
-            echo 'Backend API: http://${EC2_HOST}:5000/api/projects'
+            echo "Frontend: http://${S3_BUCKET_NAME}.s3-website-${AWS_DEFAULT_REGION}.amazonaws.com"
+            echo "Backend API: http://${EC2_HOST}:5000/api/projects"
         }
         failure {
             echo '❌ Pipeline failed! Check the logs above for details.'
